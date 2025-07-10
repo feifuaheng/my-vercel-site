@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>继电器控制模式生成器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        header {
+            background: rgba(0, 40, 85, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #00a8ff;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #00a8ff;
+            text-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: rgba(30, 30, 50, 0.6);
+            margin: 10px;
+            border-radius: 15px;
+            border: 1px solid #2c3e50;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00a8ff;
+            color: #00a8ff;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+        }
+        
+        .mode-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: rgba(0, 40, 85, 0.7);
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(0, 80, 160, 0.7);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        }
+        
+        .mode-btn.active {
+            background: #007bff;
+            border-color: #00a8ff;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
+        }
+        
+        .mode-btn i {
+            margin-right: 8px;
+            font-size: 1.3rem;
+        }
+        
+        .mode-description {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .function-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .func-btn {
+            padding: 12px;
+            background: rgba(30, 50, 70, 0.7);
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+        
+        .func-btn:hover {
+            background: rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .func-btn.active {
+            background: #3498db;
+            border-color: #00a8ff;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+        }
+        
+        .func-btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            background: rgba(20, 20, 40, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 10px;
+            border: 2px solid #2c3e50;
+        }
+        
+        .result-display {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #00a8ff;
+            text-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
+            margin: 20px 0;
+            letter-spacing: 5px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 2px solid #00a8ff;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(to right, #00a8ff, #007bff);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.6);
+            background: linear-gradient(to right, #00c3ff, #0095ff);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .rules {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(30, 40, 60, 0.6);
+            border-radius: 15px;
+        }
+        
+        .rules h3 {
+            color: #00a8ff;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .rules ul {
+            padding-left: 20px;
+        }
+        
+        .rules li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .status {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .result-display {
+                font-size: 3.5rem;
+            }
+            
+            .mode-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        .info-text {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 40, 85, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .selection-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(30, 40, 60, 0.5);
+            border-radius: 10px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .selection-summary span {
+            color: #00a8ff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-microchip"></i> 继电器控制模式生成器</h1>
+            <p class="subtitle">选择控制模式与功能条件组合，生成继电器控制代码。支持三种模式（A/B/C）和九种功能条件组合。</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-cogs"></i> 控制模式选择</h2>
+                
+                <div class="info-text">
+                    请先选择一种控制模式（A、B 或 C）。三种模式互斥，只能选择其中一种。
+                </div>
+                
+                <div class="mode-buttons">
+                    <div class="mode-btn active" data-mode="A">
+                        <i class="fas fa-check-circle"></i> A模式（存在模式）
+                        <div class="mode-description">满足一个条件即打开继电器</div>
+                    </div>
+                    <div class="mode-btn" data-mode="B">
+                        <i class="fas fa-random"></i> B模式（或模式）
+                        <div class="mode-description">满足两个条件中的任意一个即打开继电器</div>
+                    </div>
+                    <div class="mode-btn" data-mode="C">
+                        <i class="fas fa-braille"></i> C模式（同时存在模式）
+                        <div class="mode-description">同时满足两个条件才打开继电器</div>
+                    </div>
+                </div>
+                
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> 功能条件选择</h2>
+                
+                <div class="info-text" id="mode-info">
+                    A模式下：9个功能按钮只能选择其中一个。
+                </div>
+                
+                <div class="function-buttons">
+                    <div class="func-btn" data-func="1">
+                        <i class="fas fa-power-off"></i> 功能1：关闭继电器
+                    </div>
+                    <div class="func-btn" data-func="2">
+                        <i class="fas fa-thermometer-quarter"></i> 功能2：&lt;设定温度值打开
+                    </div>
+                    <div class="func-btn" data-func="3">
+                        <i class="fas fa-thermometer-three-quarters"></i> 功能3：&gt;设定温度值打开
+                    </div>
+                    <div class="func-btn" data-func="4">
+                        <i class="fas fa-ruler-combined"></i> 功能4：温度范围内打开
+                    </div>
+                    <div class="func-btn" data-func="5">
+                        <i class="fas fa-ruler"></i> 功能5：温度范围外打开
+                    </div>
+                    <div class="func-btn" data-func="6">
+                        <i class="fas fa-bolt"></i> 功能6：&lt;设定电流值打开
+                    </div>
+                    <div class="func-btn" data-func="7">
+                        <i class="fas fa-bolt"></i> 功能7：&gt;设定电流值打开
+                    </div>
+                    <div class="func-btn" data-func="8">
+                        <i class="fas fa-wave-square"></i> 功能8：电流范围内打开
+                    </div>
+                    <div class="func-btn" data-func="9">
+                        <i class="fas fa-wave-square"></i> 功能9：电流范围外打开
+                    </div>
+                </div>
+                
+                <div class="selection-summary">
+                    当前选择：<span id="current-selection">A模式，未选择功能</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="result-container">
+                    <h2 class="panel-title"><i class="fas fa-code"></i> 控制代码生成</h2>
+                    <div class="result-display" id="result">A000</div>
+                    <button class="generate-btn" id="generateBtn">
+                        <i class="fas fa-cogs"></i> 生成控制代码
+                    </button>
+                    
+                    <div class="rules">
+                        <h3><i class="fas fa-info-circle"></i> 生成规则说明</h3>
+                        <ul>
+                            <li>A模式：选择功能1生成A000，功能2生成A001，...功能9生成A008</li>
+                            <li>B/C模式：功能1只能单独使用（生成B000/C000）</li>
+                            <li>B/C模式：功能2-5选一个 + 功能6-9选一个生成B001-C016</li>
+                            <li>组合规则：功能2+功能6 → B001，功能2+功能7 → B002，以此类推</li>
+                            <li>最大生成范围：A000-A008, B000-B016, C000-C016</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="status">
+                        <div><i class="fas fa-sync-alt"></i> 状态: <span id="status">就绪</span></div>
+                        <div><i class="fas fa-history"></i> 最后生成: <span id="last-gen">刚刚</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 获取DOM元素
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const funcButtons = document.querySelectorAll('.func-btn');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultDisplay = document.getElementById('result');
+        const modeInfo = document.getElementById('mode-info');
+        const currentSelection = document.getElementById('current-selection');
+        const statusText = document.getElementById('status');
+        const lastGen = document.getElementById('last-gen');
+        
+        // 当前选择状态
+        let currentMode = 'A';
+        let selectedFunctions = {
+            group1: null,  // 功能1
+            group2: null,  // 功能2-5
+            group3: null   // 功能6-9
+        };
+        
+        // 初始化
+        function init() {
+            // 设置模式按钮事件
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 移除所有active类
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    // 添加active类到当前按钮
+                    btn.classList.add('active');
+                    // 更新当前模式
+                    currentMode = btn.dataset.mode;
+                    
+                    // 清除所有功能选择
+                    clearFunctionSelection();
+                    
+                    // 更新模式信息
+                    updateModeInfo();
+                    updateSelectionText();
+                });
+            });
+            
+            // 设置功能按钮事件
+            funcButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const funcId = parseInt(btn.dataset.func);
+                    
+                    // 处理不同模式下的选择逻辑
+                    if (currentMode === 'A') {
+                        // A模式：只能选择一个功能
+                        funcButtons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        
+                        // 更新选择状态
+                        selectedFunctions.group1 = funcId === 1 ? 1 : null;
+                        selectedFunctions.group2 = funcId >= 2 && funcId <= 5 ? funcId : null;
+                        selectedFunctions.group3 = funcId >= 6 && funcId <= 9 ? funcId : null;
+                    } 
+                    else { // B或C模式
+                        if (funcId === 1) {
+                            // 功能1：只能单独使用
+                            clearFunctionSelection();
+                            btn.classList.add('active');
+                            selectedFunctions.group1 = 1;
+                        } 
+                        else if (funcId >= 2 && funcId <= 5) {
+                            // 功能2-5：取消功能1的选择
+                            document.querySelector(`.func-btn[data-func="1"]`).classList.remove('active');
+                            selectedFunctions.group1 = null;
+                            
+                            // 取消同组其他选择
+                            for (let i = 2; i <= 5; i++) {
+                                if (i !== funcId) {
+                                    document.querySelector(`.func-btn[data-func="${i}"]`).classList.remove('active');
+                                }
+                            }
+                            
+                            // 设置当前选择
+                            btn.classList.toggle('active');
+                            selectedFunctions.group2 = btn.classList.contains('active') ? funcId : null;
+                        } 
+                        else if (funcId >= 6 && funcId <= 9) {
+                            // 功能6-9：取消功能1的选择
+                            document.querySelector(`.func-btn[data-func="1"]`).classList.remove('active');
+                            selectedFunctions.group1 = null;
+                            
+                            // 取消同组其他选择
+                            for (let i = 6; i <= 9; i++) {
+                                if (i !== funcId) {
+                                    document.querySelector(`.func-btn[data-func="${i}"]`).classList.remove('active');
+                                }
+                            }
+                            
+                            // 设置当前选择
+                            btn.classList.toggle('active');
+                            selectedFunctions.group3 = btn.classList.contains('active') ? funcId : null;
+                        }
+                    }
+                    
+                    updateSelectionText();
+                });
+            });
+            
+            // 生成按钮事件
+            generateBtn.addEventListener('click', generateCode);
+            
+            // 初始选择文本更新
+            updateSelectionText();
+        }
+        
+        // 清除所有功能选择
+        function clearFunctionSelection() {
+            funcButtons.forEach(btn => btn.classList.remove('active'));
+            selectedFunctions = {
+                group1: null,
+                group2: null,
+                group3: null
+            };
+        }
+        
+        // 更新模式信息文本
+        function updateModeInfo() {
+            if (currentMode === 'A') {
+                modeInfo.textContent = "A模式下：9个功能按钮只能选择其中一个。";
+            } else {
+                modeInfo.textContent = `${currentMode}模式下：功能1只能单独使用；功能2-5中选择一个，功能6-9中选择一个。`;
+            }
+        }
+        
+        // 更新选择状态文本
+        function updateSelectionText() {
+            let selectionText = `${currentMode}模式`;
+            
+            if (currentMode === 'A') {
+                if (selectedFunctions.group1 || selectedFunctions.group2 || selectedFunctions.group3) {
+                    const funcId = selectedFunctions.group1 || selectedFunctions.group2 || selectedFunctions.group3;
+                    selectionText += `，功能${funcId}`;
+                } else {
+                    selectionText += "，未选择功能";
+                }
+            } else {
+                if (selectedFunctions.group1) {
+                    selectionText += "，功能1";
+                } else if (selectedFunctions.group2 && selectedFunctions.group3) {
+                    selectionText += `，功能${selectedFunctions.group2} + 功能${selectedFunctions.group3}`;
+                } else if (selectedFunctions.group2) {
+                    selectionText += `，功能${selectedFunctions.group2}（缺少功能6-9选择）`;
+                } else if (selectedFunctions.group3) {
+                    selectionText += `，功能${selectedFunctions.group3}（缺少功能2-5选择）`;
+                } else {
+                    selectionText += "，未选择功能";
+                }
+            }
+            
+            currentSelection.textContent = selectionText;
+        }
+        
+        // 生成代码
+        function generateCode() {
+            let code = "";
+            
+            if (currentMode === 'A') {
+                // A模式：功能1-9对应A000-A008
+                const funcId = selectedFunctions.group1 || selectedFunctions.group2 || selectedFunctions.group3;
+                if (funcId) {
+                    const num = funcId - 1; // 1->0, 2->1, ..., 9->8
+                    code = `A${num.toString().padStart(3, '0')}`;
+                    statusText.textContent = "生成成功";
+                } else {
+                    code = "A---";
+                    statusText.textContent = "错误：请选择一个功能";
+                }
+            } 
+            else { // B或C模式
+                if (selectedFunctions.group1) {
+                    // 功能1单独使用
+                    code = `${currentMode}000`;
+                    statusText.textContent = "生成成功";
+                } 
+                else if (selectedFunctions.group2 && selectedFunctions.group3) {
+                    // 计算组合代码
+                    const group2Index = selectedFunctions.group2 - 2; // 2->0, 3->1, 4->2, 5->3
+                    const group3Index = selectedFunctions.group3 - 6; // 6->0, 7->1, 8->2, 9->3
+                    const num = group2Index * 4 + group3Index + 1; // 1-16
+                    
+                    code = `${currentMode}${num.toString().padStart(3, '0')}`;
+                    statusText.textContent = "生成成功";
+                } 
+                else {
+                    code = `${currentMode}---`;
+                    statusText.textContent = "错误：无效的功能组合";
+                }
+            }
+            
+            resultDisplay.textContent = code;
+            
+            // 更新最后生成时间
+            const now = new Date();
+            lastGen.textContent = now.toLocaleTimeString();
+        }
+        
+        // 初始化应用
+        init();
+    </script>
+</body>
+</html>
